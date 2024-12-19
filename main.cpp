@@ -1,21 +1,20 @@
 #include <unistd.h>
 #include <termios.h>
-#include "../Nyx-ANSI/ANSI.h"
+#include "../Nyx-CNG/Nyx-ANSI.h"
+#include "../Nyx-CNG/Nyx-Mouse.h"
 #include "Logic.h"
 #include "UI.h"
 
 int main() {
-    Putstr(CLEAR);
-    if (set_input_mode(0, 0) == 0) return -1;
-
+    Putstr(CURSOR_INVISIBLE);
+    enable_raw_mode(0, 10, 0);
     char c = '-';
     while (c != 'q') {
         c = Getch();
         if (c != 0) Putch(c);
         else Putch('-');
-        sleep(0);
     }
 
-    reset_input_mode();
+    disable_raw_mode();
     return 0;
 }

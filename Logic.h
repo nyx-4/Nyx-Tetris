@@ -1,3 +1,5 @@
+short Height = 20, Width = 20, Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece;
+
 char Getch() { // 0 if no input
     char ch;
     if (!read(STDIN_FILENO, &ch, 1)) ch = 0;
@@ -8,41 +10,13 @@ void Putch(char ch) {
     write(STDIN_FILENO, &ch, 1);
 }
 
+void Putint(int n) {
+    if (n / 10) Putint(n / 10);
+    Putch((char)(n % 10 + 48));
+}
+
 void Putstr(char Str[]) {
     for (int i = 0; Str[i] != '\0'; i++) Putch(Str[i]);
-}
-
-
-
-// Program taken from "Noncanonical Mode Example" (https://www.gnu.org/software/libc/manual/html_node/Noncanon-Example.html)
-// For in depth knowledge refer To "17.4.10 Noncanonical Input" (https://www.gnu.org/software/libc/manual/html_node/Noncanonical-Input.html)
-
-struct termios saved_attributes; // Use this variable to remember original terminal attributes.
-
-void reset_input_mode() {
-    tcsetattr(0, TCSANOW, &saved_attributes);
-}
-
-bool set_input_mode(int ChToWait = 1, int TimeToWait = 10) {
-    struct termios tattr;
-
-    /* Make sure stdin is a terminal. */
-    if (!isatty(STDIN_FILENO)) {
-        Putstr(FG_RED);
-        Putstr("Not a terminal!!\n");
-        Putstr(FG_DEFAULT);
-        return 0;
-    }
-
-    /* Save the terminal attributes so we can restore them later. */
-    tcgetattr(STDIN_FILENO, &saved_attributes);
-
-    tcgetattr(STDIN_FILENO, &tattr);
-    tattr.c_lflag &= ~(ICANON | ECHO); /* Clear ICANON and ECHO. */
-    tattr.c_cc[VMIN] = ChToWait;
-    tattr.c_cc[VTIME] = TimeToWait;
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &tattr);
-    return 1;
 }
 
 
@@ -58,7 +32,7 @@ int BinReverse(int intToRev) {
     return RevInt;
 }
 
-// Generates a random bit.
+// @brief Generates a random bit.
 bool RandBit(int& Seed, int Taps) {
     bool lfsr = 0;
     int TempSeed = Seed & Taps;
