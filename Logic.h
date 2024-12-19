@@ -54,3 +54,6 @@ int Rand(int Len, int Seed, int Taps) {
     }
     return Rnd;
 }
+
+
+short Rotate(short Block);
