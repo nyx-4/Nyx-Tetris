@@ -1,0 +1,1 @@
+void gotoyx(int y, int x);

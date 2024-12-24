@@ -15,7 +15,7 @@ void Putint(int n) {
     Putch((char)(n % 10 + 48));
 }
 
-void Putstr(char Str[]) {
+void Putstr(const char* Str) {
     for (int i = 0; Str[i] != '\0'; i++) Putch(Str[i]);
 }
 
@@ -56,4 +56,25 @@ int Rand(int Len, int Seed, int Taps) {
 }
 
 
-short Rotate(short Block);
+void DrawBlock(short block, int pos_y, int pos_x, const char *on_one){
+    gotoyx(pos_y, pos_x);
+    const char *on_zero ="\033[2C";
+        for(int i = 15; i >= 0; i--){
+        if((block >> i) & 1)
+            Putstr(on_one);
+        else
+            Putstr(on_zero);
+
+        if(i % 4 == 0) Putstr("\033[8D\033[1B");
+    }   
+}
+
+short Rotate(short block){
+    short b2 =0;
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            b2= (b2<<1) + ((block >> (3+4*j-i)) & 1); 
+        }
+    }
+    return b2;
+}
