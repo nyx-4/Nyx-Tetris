@@ -1,4 +1,6 @@
-short Height = 24, Width = 16, PaddingY = 9, PaddingX = 26, Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece;
+const short Height = 24, Width = 16, PaddingY = 9, PaddingX = 26;
+short Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece;
+short GameArr[Height] = { 0 };
 
 char Getch() { // 0 if no input
     char ch;
@@ -38,20 +40,19 @@ bool RandBit(int& Seed, int Taps) {
     int TempSeed = Seed & Taps;
     while (TempSeed) {
         lfsr ^= TempSeed & 1;
-        TempSeed /= 2;
+        TempSeed >>= 1;
     }
-    Seed = ((Seed >> 1) | (lfsr << 3));
+    Seed = ((Seed >> 1) | (lfsr << 15));
     return Seed & 1;
 }
 
 // @param Len: The Length of output Random number in bits.
 // @param Seed: A random number to use as seed.
 // @param Taps: A bitmask, can be random but recommended is to copy from https://en.wikipedia.org/wiki/Linear-feedback_shift_register#Example_polynomials_for_maximal_LFSRs.
-int Rand(int Len, int Seed, int Taps) {
-    int Rnd = 0, seed = Seed;
-    for (int i = 0;i < Len;i++) {
-        Rnd = (Rnd << 1) | RandBit(seed, BinReverse(Taps));
-    }
+int Rand(int Len, int& Seed, int Taps = 0b1101000000001000) {
+    int Rnd = 0;
+    for (int i = 0;i < Len;i++)
+        Rnd = (Rnd << 1) | RandBit(Seed, BinReverse(Taps));
     return Rnd;
 }
 
@@ -105,4 +106,12 @@ void LineCompleteClear(short LineNumber) {
     Putstr("                  ");
 
     DrawUI();
+}
+
+bool isCollision(short block, int pos_y, int pos_x) {
+    short curPartOfGame = 0;
+    for (int i = 0; i < 4; i++) {
+        curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] >> (12 - pos_x)) & 0b1111));
+    }
+    return (curPartOfGame & block);
 }
