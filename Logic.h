@@ -1,4 +1,4 @@
-short Height = 20, Width = 20, Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece;
+short Height = 24, Width = 16, PaddingY = 9, PaddingX = 26, Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece;
 short GameArr[24] = { 0 };
 
 char Getch() { // 0 if no input
@@ -58,7 +58,7 @@ int Rand(int Len, int Seed, int Taps) {
 
 
 void DrawBlock(short block, int pos_y, int pos_x, const char* on_one) {
-    gotoyx(pos_y, pos_x);
+    gotoyx(pos_y + PaddingY, 2 * pos_x + PaddingX);
     const char* on_zero = "\033[2C";
     for (int i = 15; i >= 0; i--) {
         if ((block >> i) & 1)
@@ -85,4 +85,32 @@ bool isCollision(short block, int pos_y, int pos_x) {
     for (int i = 0; i < 4; i++)
         curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] >> (12 - pos_x)) & 0b1111));
     return (curPartOfGame & block);
+}
+
+void LineCompleteChangeColor(short LineNumber, const char* Color) {
+    gotoyx(LineNumber + PaddingY, PaddingX + 1);
+    Putstr(Color);
+    for (int i = 0; i < 2 * Width;i++) Putch(' ');
+    Putstr(BG_DEFAULT);
+}
+
+void LineCompleteClear(short LineNumber) {
+    gotoyx(LineNumber + PaddingY, 1);
+    Putstr(DELETE_LINE);
+    gotoyx(1, 1);
+    Putstr(INSERT_LINE);
+    gotoyx(PaddingY + 1, PaddingX);
+    Putstr(CLEAR_LINE);
+
+    // Removes Remains of Previous UI
+    gotoyx(15, 2 * Width + 28);
+    Putstr("            ");
+    gotoyx(13, 8);
+    Putstr("                ");
+    gotoyx(16, 8);
+    Putstr("                ");
+    gotoyx(18, 7);
+    Putstr("                  ");
+
+    DrawUI();
 }
