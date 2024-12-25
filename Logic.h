@@ -80,6 +80,13 @@ short Rotate(short block) {
     return b2;
 }
 
+bool isCollision(short block, int pos_y, int pos_x) {
+    short curPartOfGame = 0;
+    for (int i = 0; i < 4; i++)
+        curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] >> (12 - pos_x)) & 0b1111));
+    return (curPartOfGame & block);
+}
+
 void LineCompleteChangeColor(short LineNumber, const char* Color) {
     gotoyx(LineNumber + PaddingY, PaddingX + 1);
     Putstr(Color);
