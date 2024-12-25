@@ -1,4 +1,4 @@
-short Height = 20, Width = 20, Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece;
+short Height = 24, Width = 16, Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece;
 
 char Getch() { // 0 if no input
     char ch;
@@ -15,7 +15,7 @@ void Putint(int n) {
     Putch((char)(n % 10 + 48));
 }
 
-void Putstr(char Str[]) {
+void Putstr(const char* Str) {
     for (int i = 0; Str[i] != '\0'; i++) Putch(Str[i]);
 }
 
