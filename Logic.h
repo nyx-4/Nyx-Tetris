@@ -115,10 +115,51 @@ void LineCompleteClear(short LineNumber) {
     DrawUI();
 }
 
-bool isCollision(short block, int pos_y, int pos_x) {
-    short curPartOfGame = 0;
-    for (int i = 0; i < 4; i++) {
-        curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] >> (12 - pos_x)) & 0b1111));
+void StartCustomGame() {
+    short block = 0b1110010001000010, pos_y = 1, pos_x = Width / 2 - 2;
+    GameArr[Height] = 0b1111111111111111;   // For bottom Collision detection.
+    int Garbage = 12;
+
+    DrawUI();
+    char c = 1;
+    while (c != 'q') {
+        switch (c) {
+            case 'h': case 'a':
+                DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+                pos_x--;
+                pos_y--;
+                break;
+            case 'j': case 's':
+                DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+                pos_y++;
+                break;
+            case 'l': case 'd':
+                DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+                pos_x++;
+                pos_y--;
+                break;
+            case 'k':case 'w':
+                if (!isCollision(Rotate(block), pos_y, pos_x)) {
+                    DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+                    block = Rotate(block);
+                    pos_y--;
+                }
+                break;
+        }
+
+        if (isCollision(block, pos_y, pos_x)) {
+            pos_x = Width / 2 - 2;
+            pos_y = 1;
+            block = Rand(16, Garbage);
+            DrawBlock(block, pos_y, pos_x, "\033[41m  \033[49m");
+        }
+
+
+        DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+        pos_y++;
+        DrawBlock(block, pos_y, pos_x, "\033[41m  \033[49m");
+
+        c = Getch();
     }
-    return (curPartOfGame & block);
+
 }

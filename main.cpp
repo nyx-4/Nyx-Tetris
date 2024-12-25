@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <termios.h>
+#include "Declarations.h"
 #include "../Nyx-CNG/Nyx-ANSI.h"
 #include "../Nyx-CNG/Nyx-Mouse.h"
 #include "Logic.h"
@@ -8,13 +9,24 @@
 int main() {
     Putstr(CURSOR_INVISIBLE);
     enable_raw_mode(0, 10, 0);
-    char c = '-';
-    while (c != 'q') {
-        c = Getch();
-        if (c != 0) Putch(c);
-        else Putch('-');
+    DrawLogin();
+
+    char c;
+
+FirstInput:
+    c = Getch();
+    switch (c) {
+        case 'C':case 'c':
+            Putstr(CLEAR);
+            StartCustomGame();
+            break;
+        default:
+            goto FirstInput;    // A very bad logic, Expect deprecation soon..
+            break;
     }
 
+
+    Putstr(CURSOR_VISIBLE);
     disable_raw_mode();
     return 0;
 }
