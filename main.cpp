@@ -8,7 +8,7 @@
 
 int main() {
     Putstr(CURSOR_INVISIBLE);
-    enable_raw_mode(0, 10, 0);
+    enable_raw_mode(0, 2, 0);
     DrawLogin();
 
     char c;
@@ -16,6 +16,8 @@ int main() {
 FirstInput:
     c = Getch();
     switch (c) {
+        case 'Q':case 'q':
+            break;
         case 'C':case 'c':
             Putstr(CLEAR);
             StartClassicGame();

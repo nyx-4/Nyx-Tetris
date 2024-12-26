@@ -1,6 +1,6 @@
 const short Height = 24, Width = 16, PaddingY = 9, PaddingX = 26;
 short Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece;
-short GameArr[Height] = { 0 };
+short GameArr[Height + 1] = { 0 };
 
 char Getch() { // 0 if no input
     char ch;
@@ -57,9 +57,8 @@ int Rand(int Len, int& Seed, int Taps = 0b1101000000001000) {
 }
 
 
-void DrawBlock(short block, int pos_y, int pos_x, const char* on_one) {
+void DrawBlock(short block, int pos_y, int pos_x, const char* on_one, const char* on_zero = "\033[2C") {
     gotoyx(pos_y + PaddingY, 2 * pos_x + PaddingX);
-    const char* on_zero = "\033[2C";
     for (int i = 15; i >= 0; i--) {
         if ((block >> i) & 1)
             Putstr(on_one);
@@ -129,8 +128,12 @@ const char* BlockColor(short block, short RotateState) {   // "\033[41m  \033[49
     return ColorStr;
 }
 
+void DrawNextBlock(short blockNext) {
+    DrawBlock(blockNext, 10 - PaddingY, Width + 2, BlockColor(blockNext, 0), "\033[49m  ");
+}
+
 void StartClassicGame() {
-    short block = 0b1110010001000010, pos_y = 1, pos_x = Width / 2 - 2, RotateState;
+    short block = 0b1110010001000010, blockNext = 0b1110010001000010, pos_y = 1, pos_x = Width / 2 - 2, RotateState = 0, InputCounter = 0;
     GameArr[Height] = 0b1111111111111111;   // For bottom Collision detection.
     int Garbage = 12;
 
@@ -160,12 +163,17 @@ void StartClassicGame() {
                     pos_y--;
                 }
                 break;
+            case 'p':case 'P':
+                while (c != 'r' && c != 'R' && c != 'q' && c != 'Q') c = Getch();
+                break;
         }
 
         if (isCollision(block, pos_y, pos_x)) {
             pos_x = Width / 2 - 2;
             pos_y = 1;
-            block = Rand(16, Garbage);
+            block = blockNext;
+            blockNext = Rand(16, Garbage);
+            DrawNextBlock(blockNext);
             DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));   //"\033[41m  \033[49m"
         }
 
