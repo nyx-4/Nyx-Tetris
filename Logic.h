@@ -115,8 +115,22 @@ void LineCompleteClear(short LineNumber) {
     DrawUI();
 }
 
-void StartCustomGame() {
-    short block = 0b1110010001000010, pos_y = 1, pos_x = Width / 2 - 2;
+const char* BlockColor(short block, short RotateState) {   // "\033[41m  \033[49m"
+    for (int i = 0; i < 4 - RotateState; i++) block = Rotate(block);
+
+    int ColorCode = 0;
+    for (int i = 0; i < 8; i++)
+        ColorCode = (ColorCode << 1) | (((block >> (2 * i)) ^ (block >> (2 * i + 1))) & 1);
+
+    static char ColorStr[20] = "\033[48;5;126m  \033[49m";
+    ColorStr[7] = (((ColorCode / 100) % 10) + 48);
+    ColorStr[8] = (((ColorCode / 10) % 10) + 48);
+    ColorStr[9] = ((ColorCode % 10) + 48);
+    return ColorStr;
+}
+
+void StartClassicGame() {
+    short block = 0b1110010001000010, pos_y = 1, pos_x = Width / 2 - 2, RotateState;
     GameArr[Height] = 0b1111111111111111;   // For bottom Collision detection.
     int Garbage = 12;
 
@@ -140,6 +154,7 @@ void StartCustomGame() {
                 break;
             case 'k':case 'w':
                 if (!isCollision(Rotate(block), pos_y, pos_x)) {
+                    RotateState = (RotateState + 1) % 4;
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                     block = Rotate(block);
                     pos_y--;
@@ -151,13 +166,13 @@ void StartCustomGame() {
             pos_x = Width / 2 - 2;
             pos_y = 1;
             block = Rand(16, Garbage);
-            DrawBlock(block, pos_y, pos_x, "\033[41m  \033[49m");
+            DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));   //"\033[41m  \033[49m"
         }
 
 
         DrawBlock(block, pos_y, pos_x, "\033[49m  ");
         pos_y++;
-        DrawBlock(block, pos_y, pos_x, "\033[41m  \033[49m");
+        DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
 
         c = Getch();
     }

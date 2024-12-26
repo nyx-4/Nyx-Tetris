@@ -18,7 +18,7 @@ FirstInput:
     switch (c) {
         case 'C':case 'c':
             Putstr(CLEAR);
-            StartCustomGame();
+            StartClassicGame();
             break;
         default:
             goto FirstInput;    // A very bad logic, Expect deprecation soon..
