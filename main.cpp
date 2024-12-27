@@ -8,7 +8,7 @@
 
 int main() {
     Putstr(CURSOR_INVISIBLE);
-    enable_raw_mode(0, 2, 0);
+    enable_raw_mode(0, 10, 0);
     DrawLogin();
 
     char c;
@@ -20,7 +20,12 @@ FirstInput:
             break;
         case 'C':case 'c':
             Putstr(CLEAR);
-            StartClassicGame();
+            StartGame();
+            break;
+        case 'M':case 'm':
+            Putstr(CLEAR);
+            isClassic = false;
+            StartGame();
             break;
         default:
             goto FirstInput;    // A very bad logic, Expect deprecation soon..
