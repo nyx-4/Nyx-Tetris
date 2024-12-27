@@ -1,6 +1,6 @@
 const short Height = 24, Width = 16, PaddingY = 9, PaddingX = 26;
 short Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece;
-short GameArr[Height] = { 0 };
+short GameArr[Height + 1] = { 0 };
 
 char Getch() { // 0 if no input
     char ch;
@@ -83,7 +83,7 @@ short Rotate(short block) {
 bool isCollision(short block, int pos_y, int pos_x) {
     short curPartOfGame = 0;
     for (int i = 0; i < 4; i++)
-        curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] >> (12 - pos_x)) & 0b1111));
+        curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i - 1] >> (12 - pos_x)) & 0b1111));
     return (curPartOfGame & block);
 }
 
@@ -129,10 +129,10 @@ void StartCustomGame() {
                 pos_x--;
                 pos_y--;
                 break;
-            case 'j': case 's':
-                DrawBlock(block, pos_y, pos_x, "\033[49m  ");
-                pos_y++;
-                break;
+                // case 'j': case 's':
+                //     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+                //     pos_y++;
+                //     break;
             case 'l': case 'd':
                 DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                 pos_x++;
@@ -148,9 +148,12 @@ void StartCustomGame() {
         }
 
         if (isCollision(block, pos_y, pos_x)) {
+            FreezeBlock(block, pos_y, pos_x);
+            // LineCompleted = CheckForLineComplete();
             pos_x = Width / 2 - 2;
             pos_y = 1;
-            block = Rand(16, Garbage);
+            // block = Rand(16, Garbage);
+            block = 0b1111000000000000;
             DrawBlock(block, pos_y, pos_x, "\033[41m  \033[49m");
         }
 
@@ -162,4 +165,11 @@ void StartCustomGame() {
         c = Getch();
     }
 
+}
+
+
+void FreezeBlock(short block, int pos_y, int pos_x) {
+    for (int i = 0; i < 4; i++) {
+        GameArr[pos_y - 1] = (((block >> (12 - 4 * i)) & 0b1111) << (12 - pos_x)) | GameArr[pos_y - 1];
+    }
 }
