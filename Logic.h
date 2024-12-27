@@ -1,6 +1,6 @@
 const short Height = 24, Width = 16, PaddingY = 9, PaddingX = 26;
 short Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece, NumberOfCustomPolyominos = 0;
-unsigned short GameArr[Height + 1] = { 0 }, CustomPolyominos[20] = { 0 };
+unsigned short GameArr[Height + 1] = { 0 }, CustomPolyominos[20 + 1] = { 0 };
 unsigned short ClassicTetrominos[7] = { 0b1111000000000000, 0b1100110000000000, 0b0110110000000000, 0b1100011000000000, 0b1000100011000000, 0b1100100010000000, 0b1110010000000000 };
 bool isClassic = true, isCustomPolyomino = false;
 
@@ -99,7 +99,7 @@ bool isCollision(short block, int pos_y, int pos_x) {
     if (pos_x - EmptyColumnsOnLeft(block) <= 0 || pos_x >= 13 + EmptyColumnsOnRight(block)) return true;
     short curPartOfGame = 0;
     for (int i = 0; i < 4; i++)
-        curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] >> (12 - pos_x)) & 0b1111));
+        curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i - 1] >> (12 - pos_x)) & 0b1111));
     return (curPartOfGame & block);
 }
 
@@ -165,10 +165,10 @@ void StartGame() {
                     pos_y--;
                     break;
                 }
-            case 'j': case 's':
-                DrawBlock(block, pos_y, pos_x, "\033[49m  ");
-                pos_y++;
-                break;
+                // case 'j': case 's':
+                //     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+                //     pos_y++;
+                //     break;
             case 'l': case 'd':
                 if (!isCollision(block, pos_y, pos_x + 1)) {
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
@@ -190,6 +190,8 @@ void StartGame() {
         }
 
         if (isCollision(block, pos_y, pos_x)) {
+            FreezeBlock(block, pos_y, pos_x);
+            // LineCompleted = CheckForLineComplete();
             pos_x = Width / 2 - 2;
             pos_y = 1;
             block = blockNext;
@@ -211,4 +213,11 @@ void StartGame() {
         c = Getch();
     }
 
+}
+
+
+void FreezeBlock(short block, int pos_y, int pos_x) {
+    for (int i = 0; i < 4; i++) {
+        GameArr[pos_y - 1] = (((block >> (12 - 4 * i)) & 0b1111) << (12 - pos_x)) | GameArr[pos_y - 1];
+    }
 }
