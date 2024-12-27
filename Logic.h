@@ -96,7 +96,7 @@ short EmptyColumnsOnLeft(short block) {
 }
 
 bool isCollision(short block, int pos_y, int pos_x) {
-    if (pos_x - EmptyColumnsOnLeft(block) <= 0 || pos_x >= 13 + EmptyColumnsOnRight(block)) return true;
+    // if (pos_x - EmptyColumnsOnLeft(block) <= 0 || pos_x >= 13 + EmptyColumnsOnRight(block)) return true;
     short curPartOfGame = 0;
     for (int i = 0; i < 4; i++)
         curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i - 1] >> (12 - pos_x)) & 0b1111));
@@ -149,6 +149,12 @@ void DrawNextBlock(short blockNext) {
     DrawBlock(blockNext, 10 - PaddingY, Width + 2, BlockColor(blockNext, 0), "\033[49m  ");
 }
 
+void FreezeBlock(short block, int pos_y, int pos_x) {
+    for (int i = 0; i < 4; i++) {
+        GameArr[pos_y - 1] = (((block >> (12 - 4 * i)) & 0b1111) << (12 - pos_x)) | GameArr[pos_y - 1];
+    }
+}
+
 void StartGame() {
     short block = 0b1110010001000010, blockNext = 0b1110010001000010, pos_y = 1, pos_x = Width / 2 - 2, RotateState = 0, InputCounter = 0;
     GameArr[Height] = 0b1111111111111111;   // For bottom Collision detection.
@@ -163,8 +169,8 @@ void StartGame() {
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                     pos_x--;
                     pos_y--;
-                    break;
                 }
+                break;
                 // case 'j': case 's':
                 //     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                 //     pos_y++;
@@ -174,8 +180,8 @@ void StartGame() {
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                     pos_x++;
                     pos_y--;
-                    break;
                 }
+                break;
             case 'k':case 'w':
                 if (!isCollision(Rotate(block), pos_y, pos_x)) {
                     RotateState = (RotateState + 1) % 4;
@@ -213,11 +219,4 @@ void StartGame() {
         c = Getch();
     }
 
-}
-
-
-void FreezeBlock(short block, int pos_y, int pos_x) {
-    for (int i = 0; i < 4; i++) {
-        GameArr[pos_y - 1] = (((block >> (12 - 4 * i)) & 0b1111) << (12 - pos_x)) | GameArr[pos_y - 1];
-    }
 }
