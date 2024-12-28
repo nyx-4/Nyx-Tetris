@@ -115,3 +115,59 @@ void DrawUI() {
     Putstr("uit");
     Putstr(FG_DEFAULT);
 }
+
+void ShowTweaks() {
+
+}
+
+void ShowHelp() {
+
+}
+
+void ShowAboutUs() {
+
+}
+
+void LineCompleteChangeColor(short LineNumber, const char* Color) {
+    gotoyx(LineNumber + PaddingY + 1, PaddingX + 2);
+    Putstr(Color);
+    for (int i = 0; i < 2 * Width;i++) Putch(' ');
+    Putstr(BG_DEFAULT);
+}
+
+void LineCompleteClear(short LineNumber) {
+    gotoyx(LineNumber + PaddingY + 1, 1);
+    Putstr(DELETE_LINE);
+    gotoyx(1, 1);
+    Putstr(INSERT_LINE);
+    gotoyx(PaddingY + 1, PaddingX);
+    Putstr(CLEAR_LINE);
+
+    // Removes Remains of Previous UI
+    gotoyx(15, 2 * Width + 28);
+    Putstr("            ");
+    gotoyx(13, 8);
+    Putstr("                ");
+    gotoyx(16, 8);
+    Putstr("                ");
+    gotoyx(18, 7);
+    Putstr("                  ");
+
+    DrawUI();
+}
+
+void DrawBlock(short block, int pos_y, int pos_x, const char* on_one, const char* on_zero) {
+    gotoyx(pos_y + PaddingY + 1, 2 * pos_x + PaddingX + 2);
+    for (int i = 15; i >= 0; i--) {
+        if ((block >> i) & 1)
+            Putstr(on_one);
+        else
+            Putstr(on_zero);
+
+        if (i % 4 == 0) Putstr("\033[8D\033[1B");
+    }
+}
+
+void DrawNextBlock(short blockNext) {
+    DrawBlock(blockNext, 0, Width + 2, BlockColor(blockNext, 0), "\033[49m  ");
+}

@@ -1,9 +1,3 @@
-const short Height = 24, Width = 16, PaddingY = 9, PaddingX = 26;
-short Speed = 1, LinesCleared = 0, Score = 10, Level = 2, NextPiece, curPiece, NumberOfCustomPolyominos = 0;
-unsigned short GameArr[Height + 1] = { 0 }, CustomPolyominos[20 + 1] = { 0 };
-unsigned short ClassicTetrominos[7] = { 0b1111000000000000, 0b1100110000000000, 0b0110110000000000, 0b1100011000000000, 0b1000100011000000, 0b1100100010000000, 0b1110010000000000 };
-bool isClassic = true, isCustomPolyomino = false;
-
 char Getch() { // 0 if no input
     char ch;
     if (!read(STDIN_FILENO, &ch, 1)) ch = 0;
@@ -24,7 +18,6 @@ void Putstr(const char* Str) {
 }
 
 
-// Game Logic starts from here...
 
 // @brief Reverses a binary number
 int BinReverse(int intToRev) {
@@ -59,18 +52,6 @@ int Rand(int Len, int& Seed, int Taps = 0b1101000000001000) {
 }
 
 
-void DrawBlock(short block, int pos_y, int pos_x, const char* on_one, const char* on_zero = "\033[2C") {
-    gotoyx(pos_y + PaddingY + 1, 2 * pos_x + PaddingX + 2);
-    for (int i = 15; i >= 0; i--) {
-        if ((block >> i) & 1)
-            Putstr(on_one);
-        else
-            Putstr(on_zero);
-
-        if (i % 4 == 0) Putstr("\033[8D\033[1B");
-    }
-}
-
 short Rotate(short block) {
     short b2 = 0;
     for (int i = 0; i < 4; i++) {
@@ -100,36 +81,9 @@ bool isCollision(short block, int pos_y, int pos_x) {
     short curPartOfGame = 0;
     for (int i = 0; i < 4; i++)
         if (pos_y + i < 0 || pos_y + i > Height) curPartOfGame = (curPartOfGame << 4);
-        else curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] >> (11 - pos_x + EmptyColumnsOnRight(block))) & 0b1111));
+        else if (12 - pos_x < 0) { curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] << (pos_x - 12)) & 0b1111)); }
+        else curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] >> (12 - pos_x)) & 0b1111));
     return (curPartOfGame & block);
-}
-
-void LineCompleteChangeColor(short LineNumber, const char* Color) {
-    gotoyx(LineNumber + PaddingY, PaddingX + 1);
-    Putstr(Color);
-    for (int i = 0; i < 2 * Width;i++) Putch(' ');
-    Putstr(BG_DEFAULT);
-}
-
-void LineCompleteClear(short LineNumber) {
-    gotoyx(LineNumber + PaddingY, 1);
-    Putstr(DELETE_LINE);
-    gotoyx(1, 1);
-    Putstr(INSERT_LINE);
-    gotoyx(PaddingY + 1, PaddingX);
-    Putstr(CLEAR_LINE);
-
-    // Removes Remains of Previous UI
-    gotoyx(15, 2 * Width + 28);
-    Putstr("            ");
-    gotoyx(13, 8);
-    Putstr("                ");
-    gotoyx(16, 8);
-    Putstr("                ");
-    gotoyx(18, 7);
-    Putstr("                  ");
-
-    DrawUI();
 }
 
 const char* BlockColor(short block, short RotateState) {   // "\033[41m  \033[49m"
@@ -140,32 +94,59 @@ const char* BlockColor(short block, short RotateState) {   // "\033[41m  \033[49
         ColorCode = (ColorCode << 1) | (((block >> (2 * i)) ^ (block >> (2 * i + 1))) & 1);
 
     static char ColorStr[20] = "\033[48;5;126m  \033[49m";
-    ColorStr[7] = (((ColorCode / 100) % 10) + 48);
-    ColorStr[8] = (((ColorCode / 10) % 10) + 48);
-    ColorStr[9] = ((ColorCode % 10) + 48);
+    ColorStr[7] = ColorCode / 100 % 10 + 48;
+    ColorStr[8] = ColorCode / 10 % 10 + 48;
+    ColorStr[9] = ColorCode % 10 + 48;
     return ColorStr;
 }
 
-void DrawNextBlock(short blockNext) {
-    DrawBlock(blockNext, 10 - PaddingY, Width + 2, BlockColor(blockNext, 0), "\033[49m  ");
+void FreezeBlock(short block, int pos_y, int pos_x) {
+    for (int i = 0; i < 4; i++)
+        if (pos_y + i >= 0 && pos_y + i < Height)
+            if (12 - pos_x < 0) GameArr[pos_y + i] = GameArr[pos_y + i] | (((block >> (12 - 4 * i)) & 0b1111) >> (pos_x - 12));
+            else GameArr[pos_y + i] = GameArr[pos_y + i] | (((block >> (12 - 4 * i)) & 0b1111) << (12 - pos_x));
 }
 
-// Tested
-void FreezeBlock(short block, int pos_y, int pos_x) {
-    for (int i = 0; i < 4; i++) {
-        if (pos_y + i >= 0 && pos_y + i < Height) GameArr[pos_y + i] = (((block >> (12 - 4 * i)) & 0b1111) << (12 - pos_x + EmptyColumnsOnRight(block))) | GameArr[pos_y + i];
-    }
+void LineComplete(short pos_y) {
+    // Make Yellow
+    for (int i = 3; i >= 0; i--)
+        if (pos_y + i < Height && GameArr[pos_y + i] == 0b1111111111111111) {
+            LineCompleteChangeColor(pos_y + i, BG_YELLOW);
+            Getch();
+        }
+
+    // Make Default
+    for (int i = 3; i >= 0; i--)
+        if (pos_y + i < Height && GameArr[pos_y + i] == 0b1111111111111111) {
+            LineCompleteChangeColor(pos_y + i, BG_DEFAULT);
+            Getch();
+        }
+
+    // Clear Lines
+    for (int i = 3; i >= 0; i--)
+        if (pos_y + i < Height && GameArr[pos_y + i] == 0b1111111111111111) {
+            LineCompleteClear(pos_y + i);
+            pos_y--;
+            Getch();
+        }
+}
+
+int GetGarbage(int Counter = 25) {
+    int a;
+    if (a != 0) return a;
+    if (Counter < 0) return 12;
+    return GetGarbage(Counter - 1);
 }
 
 void StartGame() {
-    short block = 0b0000111100000000, blockNext = 0b0000111100000000, pos_y = 0, pos_x = 0, RotateState = 0, InputCounter = 0;
+    short block = 0b0100010001000100, blockNext = 0b0100010001000100, pos_y = 0, pos_x = 0, RotateState = 0, Ticks = 3, TicksCounter = 3;
     GameArr[Height] = 0b1111111111111111;   // For bottom Collision detection.
-    int Garbage = 12;
+    int Garbage = GetGarbage();
 
     DrawUI();
-    char c = 1;
-    while (c != 'q') {
-        switch (c) {
+    char ch = '0';
+    while (ch != 'q') {
+        switch (ch) {
             case 'h': case 'a':
                 if (!isCollision(block, pos_y, pos_x - 1)) {
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
@@ -173,10 +154,6 @@ void StartGame() {
                     DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
                 }
                 break;
-                // case 'j': case 's':
-                //     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
-                //     pos_y++;
-                //     break;
             case 'l': case 'd':
                 if (!isCollision(block, pos_y, pos_x + 1)) {
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
@@ -184,7 +161,7 @@ void StartGame() {
                     DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
                 }
                 break;
-            case 'k':case 'w':
+            case 'k': case 'w':
                 if (!isCollision(Rotate(block), pos_y, pos_x)) {
                     RotateState = (RotateState + 1) % 4;
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
@@ -192,32 +169,41 @@ void StartGame() {
                     DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
                 }
                 break;
-            case 'p':case 'P':
-                while (c != 'r' && c != 'R' && c != 'q' && c != 'Q') c = Getch();
+            case 'P': case 'p':
+                while (ch != 'r' && ch != 'R' && ch != 'q' && ch != 'Q') ch = Getch();
                 break;
             default:
-                if (isCollision(block, pos_y + 1, pos_x)) {
-                    FreezeBlock(block, pos_y, pos_x);
-                    // LineCompleted = CheckForLineComplete();
-                    pos_x = Width / 2 - 2;
-                    pos_y = 1;
-                    block = blockNext;
-                    RotateState = 0;
-
-                    if (isClassic) blockNext = ClassicTetrominos[Rand(16, Garbage) % 7];
-                    else if (isCustomPolyomino) blockNext = CustomPolyominos[Rand(16, Garbage) % NumberOfCustomPolyominos];
-                    else blockNext = Rand(16, Garbage);
-
-                    DrawNextBlock(blockNext);
-                    DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));   //"\033[41m  \033[49m"
-                }
-                else {
-                    DrawBlock(block, pos_y, pos_x, "\033[49m  ");
-                    pos_y++;
-                    DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
-                }
+                TicksCounter--;
+                break;
         }
-        c = Getch();
-    }
 
+        if (TicksCounter < 0) {
+            TicksCounter = Ticks;
+            if (!isCollision(block, pos_y + 1, pos_x)) {    // Can go down, then go down..
+                DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+                pos_y++;
+                DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
+            }
+            else {  // Can't go down, lock its position
+                FreezeBlock(block, pos_y, pos_x);
+
+                LineComplete(pos_y);
+
+                block = blockNext;
+
+                if (isClassic) blockNext = ClassicTetrominos[Rand(7, Garbage) % 7];
+                else if (isCustomPolyomino) blockNext = CustomPolyominos[Rand(7, Garbage) % NumberOfCustomPolyominos];
+                else blockNext = Rand(16, Garbage);
+                DrawNextBlock(blockNext);
+
+                RotateState = 0;
+                pos_y = 0; pos_x = 0;
+
+                DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));   //"\033[41m  \033[49m"
+            }
+        }
+
+        TicksCounter--;
+        ch = Getch();
+    }
 }

@@ -27,11 +27,22 @@ FirstInput:
             isClassic = false;
             StartGame();
             break;
+        case 'T':case 't':
+            Putstr(CLEAR);
+            ShowTweaks();
+            break;
+        case 'H':case 'h':
+            Putstr(CLEAR);
+            ShowHelp();
+            break;
+        case 'U':case 'u':
+            Putstr(CLEAR);
+            ShowAboutUs();
+            break;
         default:
-            goto FirstInput;    // A very bad logic, Expect deprecation soon..
+            goto FirstInput;
             break;
     }
-
 
     Putstr(CURSOR_VISIBLE);
     disable_raw_mode();
