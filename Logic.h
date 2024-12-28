@@ -60,7 +60,7 @@ int Rand(int Len, int& Seed, int Taps = 0b1101000000001000) {
 
 
 void DrawBlock(short block, int pos_y, int pos_x, const char* on_one, const char* on_zero = "\033[2C") {
-    gotoyx(pos_y + PaddingY, 2 * pos_x + PaddingX);
+    gotoyx(pos_y + PaddingY + 1, 2 * pos_x + PaddingX + 2);
     for (int i = 15; i >= 0; i--) {
         if ((block >> i) & 1)
             Putstr(on_one);
@@ -96,10 +96,11 @@ short EmptyColumnsOnLeft(short block) {
 }
 
 bool isCollision(short block, int pos_y, int pos_x) {
-    // if (pos_x - EmptyColumnsOnLeft(block) <= 0 || pos_x >= 13 + EmptyColumnsOnRight(block)) return true;
+    if (pos_x + EmptyColumnsOnLeft(block) < 0 || pos_x - EmptyColumnsOnRight(block) > 12) return true;
     short curPartOfGame = 0;
     for (int i = 0; i < 4; i++)
-        curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i - 1] >> (12 - pos_x)) & 0b1111));
+        if (pos_y + i < 0 || pos_y + i > Height) curPartOfGame = (curPartOfGame << 4);
+        else curPartOfGame = ((curPartOfGame << 4) | ((GameArr[pos_y + i] >> (11 - pos_x + EmptyColumnsOnRight(block))) & 0b1111));
     return (curPartOfGame & block);
 }
 
@@ -149,14 +150,15 @@ void DrawNextBlock(short blockNext) {
     DrawBlock(blockNext, 10 - PaddingY, Width + 2, BlockColor(blockNext, 0), "\033[49m  ");
 }
 
+// Tested
 void FreezeBlock(short block, int pos_y, int pos_x) {
     for (int i = 0; i < 4; i++) {
-        GameArr[pos_y - 1] = (((block >> (12 - 4 * i)) & 0b1111) << (12 - pos_x)) | GameArr[pos_y - 1];
+        if (pos_y + i >= 0 && pos_y + i < Height) GameArr[pos_y + i] = (((block >> (12 - 4 * i)) & 0b1111) << (12 - pos_x + EmptyColumnsOnRight(block))) | GameArr[pos_y + i];
     }
 }
 
 void StartGame() {
-    short block = 0b1110010001000010, blockNext = 0b1110010001000010, pos_y = 1, pos_x = Width / 2 - 2, RotateState = 0, InputCounter = 0;
+    short block = 0b0000111100000000, blockNext = 0b0000111100000000, pos_y = 0, pos_x = 0, RotateState = 0, InputCounter = 0;
     GameArr[Height] = 0b1111111111111111;   // For bottom Collision detection.
     int Garbage = 12;
 
@@ -168,7 +170,7 @@ void StartGame() {
                 if (!isCollision(block, pos_y, pos_x - 1)) {
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                     pos_x--;
-                    pos_y--;
+                    DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
                 }
                 break;
                 // case 'j': case 's':
@@ -179,7 +181,7 @@ void StartGame() {
                 if (!isCollision(block, pos_y, pos_x + 1)) {
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                     pos_x++;
-                    pos_y--;
+                    DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
                 }
                 break;
             case 'k':case 'w':
@@ -187,35 +189,34 @@ void StartGame() {
                     RotateState = (RotateState + 1) % 4;
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                     block = Rotate(block);
-                    pos_y--;
+                    DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
                 }
                 break;
             case 'p':case 'P':
                 while (c != 'r' && c != 'R' && c != 'q' && c != 'Q') c = Getch();
                 break;
+            default:
+                if (isCollision(block, pos_y + 1, pos_x)) {
+                    FreezeBlock(block, pos_y, pos_x);
+                    // LineCompleted = CheckForLineComplete();
+                    pos_x = Width / 2 - 2;
+                    pos_y = 1;
+                    block = blockNext;
+                    RotateState = 0;
+
+                    if (isClassic) blockNext = ClassicTetrominos[Rand(16, Garbage) % 7];
+                    else if (isCustomPolyomino) blockNext = CustomPolyominos[Rand(16, Garbage) % NumberOfCustomPolyominos];
+                    else blockNext = Rand(16, Garbage);
+
+                    DrawNextBlock(blockNext);
+                    DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));   //"\033[41m  \033[49m"
+                }
+                else {
+                    DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+                    pos_y++;
+                    DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
+                }
         }
-
-        if (isCollision(block, pos_y, pos_x)) {
-            FreezeBlock(block, pos_y, pos_x);
-            // LineCompleted = CheckForLineComplete();
-            pos_x = Width / 2 - 2;
-            pos_y = 1;
-            block = blockNext;
-            RotateState = 0;
-
-            if (isClassic) blockNext = ClassicTetrominos[Rand(16, Garbage) % 7];
-            else if (isCustomPolyomino) blockNext = CustomPolyominos[Rand(16, Garbage) % NumberOfCustomPolyominos];
-            else blockNext = Rand(16, Garbage);
-
-            DrawNextBlock(blockNext);
-            DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));   //"\033[41m  \033[49m"
-        }
-
-
-        DrawBlock(block, pos_y, pos_x, "\033[49m  ");
-        pos_y++;
-        DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
-
         c = Getch();
     }
 

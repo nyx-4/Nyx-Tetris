@@ -85,11 +85,11 @@ void DrawUI() {
     gotoyx(16, 9);
     Putint(LinesCleared);
 
-    box(9, 26, Height + 2, 2 * Width + 2, "");
-    box(9, 2 * Width + 28, 6, 12, "Next");
+    box(9, 26, Height + 2, 2 * Width + 4, "");
+    box(9, 2 * Width + 30, 6, 12, "Next");
 
-    box(Height + 2, 2 * Width + 28, 3, 11, "");
-    gotoyx(Height + 3, 2 * Width + 31);
+    box(Height + 2, 2 * Width + 30, 3, 11, "");
+    gotoyx(Height + 3, 2 * Width + 33);
     Putstr(FG_BLUE);
     Putstr(UNDERLINE);
     Putch('P');
@@ -97,18 +97,18 @@ void DrawUI() {
     Putstr("ause");
     Putstr(FG_DEFAULT);
 
-    box(Height + 5, 2 * Width + 28, 3, 11, "");
-    gotoyx(Height + 6, 2 * Width + 30);
+    box(Height + 5, 2 * Width + 30, 3, 11, "");
+    gotoyx(Height + 6, 2 * Width + 32);
     Putstr(FG_BLUE);
     Putstr(UNDERLINE);
     Putch('R');
     Putstr(RESET_UNDERLINE);
-    Putstr("estrart");
+    Putstr("estart");
     Putstr(FG_DEFAULT);
 
     Putstr(FG_RED);
-    box(Height + 8, 2 * Width + 28, 3, 11, "");
-    gotoyx(Height + 9, 2 * Width + 31);
+    box(Height + 8, 2 * Width + 30, 3, 11, "");
+    gotoyx(Height + 9, 2 * Width + 33);
     Putstr(UNDERLINE);
     Putch('Q');
     Putstr(RESET_UNDERLINE);
