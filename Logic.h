@@ -112,13 +112,13 @@ void LineComplete(short pos_y) {
     // Make Yellow
     for (int i = 3; i >= 0; i--)
         if (pos_y + i < Height && GameArr[pos_y + i] == 0b1111111111111111) {
-            tempScore += 100;
+            tempScore += 200;
             LinesCleared++;
             LineCompleteChangeColor(pos_y + i, BG_YELLOW);
             Getch();
         }
 
-    if (tempScore < 800) tempScore -= 100;
+    if (tempScore > 0 && tempScore < 800) tempScore -= 100;
     Score += tempScore;
     Level = LinesCleared / 10;
     if (Level < 10) Speed = 10 - Level;
@@ -135,7 +135,7 @@ void LineComplete(short pos_y) {
     for (int i = 3; i >= 0; i--)
         if (pos_y + i < Height && GameArr[pos_y + i] == 0b1111111111111111) {
             LineCompleteClear(pos_y + i);
-            for (int j = pos_y + i; j > 0; j++) GameArr[j] = GameArr[j - 1];
+            for (int j = pos_y + i; j > 0; j--) GameArr[j] = GameArr[j - 1];
             pos_y--;
             Getch();
         }
