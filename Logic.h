@@ -108,12 +108,21 @@ void FreezeBlock(short block, int pos_y, int pos_x) {
 }
 
 void LineComplete(short pos_y) {
+    int tempScore = 0;
     // Make Yellow
     for (int i = 3; i >= 0; i--)
         if (pos_y + i < Height && GameArr[pos_y + i] == 0b1111111111111111) {
+            tempScore += 100;
+            LinesCleared++;
             LineCompleteChangeColor(pos_y + i, BG_YELLOW);
             Getch();
         }
+
+    if (tempScore < 800) tempScore -= 100;
+    Score += tempScore;
+    Level = LinesCleared / 10;
+    if (Level < 10) Speed = 10 - Level;
+    else Speed = 1;
 
     // Make Default
     for (int i = 3; i >= 0; i--)
@@ -126,6 +135,7 @@ void LineComplete(short pos_y) {
     for (int i = 3; i >= 0; i--)
         if (pos_y + i < Height && GameArr[pos_y + i] == 0b1111111111111111) {
             LineCompleteClear(pos_y + i);
+            for (int j = pos_y + i; j > 0; j++) GameArr[j] = GameArr[j - 1];
             pos_y--;
             Getch();
         }
@@ -139,7 +149,7 @@ int GetGarbage(int Counter = 25) {
 }
 
 void StartGame() {
-    short block = 0b0100010001000100, blockNext = 0b0100010001000100, pos_y = 0, pos_x = 0, RotateState = 0, Ticks = 3, TicksCounter = 3;
+    short block = 0b0100010001000100, blockNext = 0b0100010001000100, pos_y = 0, pos_x = 0, RotateState = 0, TicksCounter = 3;
     GameArr[Height] = 0b1111111111111111;   // For bottom Collision detection.
     int Garbage = GetGarbage();
 
@@ -178,7 +188,7 @@ void StartGame() {
         }
 
         if (TicksCounter < 0) {
-            TicksCounter = Ticks;
+            TicksCounter += Speed;
             if (!isCollision(block, pos_y + 1, pos_x)) {    // Can go down, then go down..
                 DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                 pos_y++;
@@ -188,6 +198,7 @@ void StartGame() {
                 FreezeBlock(block, pos_y, pos_x);
 
                 LineComplete(pos_y);
+
 
                 block = blockNext;
 

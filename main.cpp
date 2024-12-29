@@ -8,7 +8,7 @@
 
 int main() {
     Putstr(CURSOR_INVISIBLE);
-    enable_raw_mode(0, 10, 0);
+    enable_raw_mode(0, 1, 0);
     DrawLogin();
 
     char c;
