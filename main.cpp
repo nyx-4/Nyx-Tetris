@@ -24,7 +24,8 @@ FirstInput:
             break;
         case 'M':case 'm':
             Putstr(CLEAR);
-            isClassic = false;
+            ModernUI();
+            Putstr(CLEAR);
             StartGame();
             break;
         case 'T':case 't':

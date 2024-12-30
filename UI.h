@@ -144,14 +144,24 @@ void LineCompleteClear(short LineNumber) {
     Putstr(CLEAR_LINE);
 
     // Removes Remains of Previous UI
-    gotoyx(15, 2 * Width + 28);
-    Putstr("            ");
+    gotoyx(15, 2 * Width + PaddingX + 3);
+    Putstr("             ");
+
+    gotoyx(10, 8);
+    Putstr("                ");
     gotoyx(13, 8);
     Putstr("                ");
     gotoyx(16, 8);
     Putstr("                ");
     gotoyx(18, 7);
     Putstr("                  ");
+
+    gotoyx(Height + 3, 2 * Width + PaddingX + 5);
+    Putstr("         ");
+    gotoyx(Height + 6, 2 * Width + PaddingX + 5);
+    Putstr("         ");
+    gotoyx(Height + 9, 2 * Width + PaddingX + 5);
+    Putstr("         ");
 
     DrawUI();
 }
@@ -170,4 +180,99 @@ void DrawBlock(short block, int pos_y, int pos_x, const char* on_one, const char
 
 void DrawNextBlock(short blockNext) {
     DrawBlock(blockNext, 0, Width + 2, BlockColor(blockNext, 0), "\033[49m  ");
+}
+
+void GetCustomPolymino() {
+    Putstr(CLEAR);
+    DrawLogo(3, 18);
+}
+
+void ShowModernUI() {
+    isClassic = false;
+    DrawLogo(3, 18);
+
+    // box(9, 1, Height, 2 * Width + PaddingX + 25, "");
+
+    gotoyx(11, 9);
+    Putstr("Rotation: ");
+
+    if (RotationAlgorithm == 0) Putstr("\033[33m");
+    box(10, 20, 3, 20, "");
+    gotoyx(11, 25);
+    Putstr("Clock-\033[4mw\033[24mise\033[39m");
+    if (RotationAlgorithm == 1) Putstr("\033[33m");
+    box(10, 42, 3, 20, "");
+    gotoyx(11, 44);
+    Putstr("\033[4mA\033[24mnti Clock-wise\033[39m");
+    if (RotationAlgorithm == 2) Putstr("\033[33m");
+    box(10, 64, 3, 20, "");
+    gotoyx(11, 66);
+    Putstr("\033[4mF\033[24mlip Horizontally\033[39m");
+
+    if (RotationAlgorithm == 3) Putstr("\033[33m");
+    box(13, 20, 3, 20, "");
+    gotoyx(14, 25);
+    Putstr("Trans\033[4mp\033[24mose\033[39m");
+    if (RotationAlgorithm == 4) Putstr("\033[33m");
+    box(13, 42, 3, 20, "");
+    gotoyx(14, 46);
+    Putstr("\033[4mR\033[24mandom Rotate\033[39m");
+    if (RotationAlgorithm == 5) Putstr("\033[33m");
+    box(13, 64, 3, 20, "");
+    gotoyx(14, 66);
+    Putstr("Flip \033[4mV\033[24mertically\033[39m");
+
+    gotoyx(18, 9);
+    Putstr("Blocks: ");
+
+    if (isClassic) Putstr("\033[33m");
+    box(17, 20, 3, 20, "");
+    gotoyx(18, 26);
+    Putstr("\033[4mC\033[24mlassic\033[39m");
+    if (isCustomPolyomino) Putstr("\033[33m");
+    box(17, 42, 3, 20, "");
+    gotoyx(18, 45);
+    Putstr("Custom \033[4mD\033[24mefined\033[39m");
+    if (isTrueRandom) Putstr("\033[33m");
+    box(17, 64, 3, 20, "");
+    gotoyx(18, 68);
+    Putstr(" \033[4mT\033[24mrue Random\033[39m");
+
+    if (isHollowRandom) Putstr("\033[33m");
+    box(20, 30, 3, 20, "");
+    gotoyx(21, 34);
+    Putstr("\033[4mH\033[24mollow Random\033[39m");
+    if (isDenseRandom) Putstr("\033[33m");
+    box(20, 52, 3, 20, "");
+    gotoyx(21, 56);
+    Putstr("D\033[4me\033[24mnse Random\033[39m");
+}
+
+void ModernUI() {
+    char ch;
+
+FirstInput:
+    ShowModernUI();
+    ch = Getch();
+    switch (ch) {
+        case 'w': RotationAlgorithm = 0; goto FirstInput;
+        case 'a': RotationAlgorithm = 1; goto FirstInput;
+        case 'f': RotationAlgorithm = 2; goto FirstInput;
+        case 'p': RotationAlgorithm = 3; goto FirstInput;
+        case 'r': RotationAlgorithm = 4; goto FirstInput;
+        case 'v': RotationAlgorithm = 5; goto FirstInput;
+
+        case 'c': isClassic = true; goto FirstInput;
+        case 'd': isCustomPolyomino = true; GetCustomPolymino(); goto FirstInput;
+        case 't': isTrueRandom = true; goto FirstInput;
+        case 'h': isHollowRandom = true; goto FirstInput;
+        case 'e': isDenseRandom = true; goto FirstInput;
+
+        case 'q': break;
+        default: goto FirstInput;
+    }
+}
+
+void GameOver() {
+
 }

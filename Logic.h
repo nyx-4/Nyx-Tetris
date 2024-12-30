@@ -54,12 +54,20 @@ int Rand(int Len, int& Seed, int Taps = 0b1101000000001000) {
 
 short Rotate(short block) {
     short b2 = 0;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
             b2 = (b2 << 1) + ((block >> (3 + 4 * j - i)) & 1);
-        }
-    }
+
     return b2;
+}
+
+short ModernRotate(short block, short RandomNumber = 0) {
+    switch (RotationAlgorithm) {
+        case 0: return Rotate(block);break;
+        case 1: return Rotate(Rotate(Rotate(block)));break;
+        case 4: for (int i = 0; i < RandomNumber; i++) block = Rotate(block); return block;
+        default: return block;
+    }
 }
 
 short EmptyColumnsOnRight(short block) {
@@ -87,7 +95,7 @@ bool isCollision(short block, int pos_y, int pos_x) {
 }
 
 const char* BlockColor(short block, short RotateState) {   // "\033[41m  \033[49m"
-    for (int i = 0; i < 4 - RotateState; i++) block = Rotate(block);
+    for (int i = 0; i < 4 - RotateState; i++) block = ModernRotate(block);
 
     int ColorCode = 0;
     for (int i = 0; i < 8; i++)
@@ -136,8 +144,9 @@ void LineComplete(short pos_y) {
         if (pos_y + i < Height && GameArr[pos_y + i] == 0b1111111111111111) {
             LineCompleteClear(pos_y + i);
             for (int j = pos_y + i; j > 0; j--) GameArr[j] = GameArr[j - 1];
-            pos_y--;
+            pos_y++;
             Getch();
+            GameArr[0] = 0;
         }
 }
 
@@ -149,33 +158,57 @@ int GetGarbage(int Counter = 25) {
 }
 
 void StartGame() {
-    short block = 0b0100010001000100, blockNext = 0b0100010001000100, pos_y = 0, pos_x = 0, RotateState = 0, TicksCounter = 3;
+    short block = 0b0100010001000100, blockNext = 0b0100010001000100, pos_y = 0, pos_x = 8, RotateState = 0, TicksCounter = 3, tempRandom = 1;
     GameArr[Height] = 0b1111111111111111;   // For bottom Collision detection.
     int Garbage = GetGarbage();
 
+
+    if (isClassic) blockNext = ClassicTetrominos[Rand(7, Garbage) % 7];
+    else if (isCustomPolyomino) blockNext = CustomPolyominos[Rand(7, Garbage) % NumberOfCustomPolyominos];
+    else if (isTrueRandom) blockNext = Rand(16, Garbage);
+    else if (isDenseRandom) blockNext = Rand(16, Garbage) | Rand(16, Garbage);
+    else if (isHollowRandom) while (blockNext == 0) blockNext = Rand(16, Garbage) & Rand(16, Garbage);
+
+    if (isClassic) block = ClassicTetrominos[Rand(7, Garbage) % 7];
+    else if (isCustomPolyomino) block = CustomPolyominos[Rand(7, Garbage) % NumberOfCustomPolyominos];
+    else if (isTrueRandom) block = Rand(16, Garbage);
+    else if (isDenseRandom) block = Rand(16, Garbage) | Rand(16, Garbage);
+    else if (isHollowRandom) while (block == 0) block = Rand(16, Garbage) & Rand(16, Garbage);
+
     DrawUI();
+    DrawNextBlock(blockNext);
     char ch = '0';
     while (ch != 'q') {
         switch (ch) {
-            case 'h': case 'a':
+            case 'h': case 'a': case 'D':
                 if (!isCollision(block, pos_y, pos_x - 1)) {
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                     pos_x--;
                     DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
                 }
                 break;
-            case 'l': case 'd':
+            case 'j': case 's': case 'B':
+                while (!isCollision(block, pos_y + 1, pos_x)) {
+                    DrawBlock(block, pos_y, pos_x, "\033[49m  ");
+                    pos_y++;
+                    Score += 2;
+                    DrawUI();
+                    DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
+                }
+                break;
+            case 'l': case 'd': case 'C':
                 if (!isCollision(block, pos_y, pos_x + 1)) {
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
                     pos_x++;
                     DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
                 }
                 break;
-            case 'k': case 'w':
-                if (!isCollision(Rotate(block), pos_y, pos_x)) {
-                    RotateState = (RotateState + 1) % 4;
+            case 'k': case 'w': case 'A':
+                if (RotationAlgorithm == 4) tempRandom = Rand(4, Garbage);
+                if (!isCollision(ModernRotate(block, tempRandom), pos_y, pos_x)) {
+                    RotateState = (RotateState + tempRandom) % 4;
                     DrawBlock(block, pos_y, pos_x, "\033[49m  ");
-                    block = Rotate(block);
+                    block = ModernRotate(block, tempRandom);
                     DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));
                 }
                 break;
@@ -204,11 +237,18 @@ void StartGame() {
 
                 if (isClassic) blockNext = ClassicTetrominos[Rand(7, Garbage) % 7];
                 else if (isCustomPolyomino) blockNext = CustomPolyominos[Rand(7, Garbage) % NumberOfCustomPolyominos];
-                else blockNext = Rand(16, Garbage);
+                else if (isTrueRandom) blockNext = Rand(16, Garbage);
+                else if (isDenseRandom) blockNext = Rand(16, Garbage) | Rand(16, Garbage);
+                else if (isHollowRandom) while (blockNext == 0) blockNext = Rand(16, Garbage) & Rand(16, Garbage);
+
+                if (isCollision(block, 0, 8)) {
+                    GameOver();
+                    break;
+                }
                 DrawNextBlock(blockNext);
 
                 RotateState = 0;
-                pos_y = 0; pos_x = 0;
+                pos_y = 0; pos_x = 8;
 
                 DrawBlock(block, pos_y, pos_x, BlockColor(block, RotateState));   //"\033[41m  \033[49m"
             }
