@@ -188,7 +188,6 @@ void GetCustomPolymino() {
 }
 
 void ShowModernUI() {
-    isClassic = false;
     DrawLogo(3, 18);
 
     // box(9, 1, Height, 2 * Width + PaddingX + 25, "");
@@ -262,11 +261,11 @@ FirstInput:
         case 'r': RotationAlgorithm = 4; goto FirstInput;
         case 'v': RotationAlgorithm = 5; goto FirstInput;
 
-        case 'c': isClassic = true; goto FirstInput;
-        case 'd': isCustomPolyomino = true; GetCustomPolymino(); goto FirstInput;
-        case 't': isTrueRandom = true; goto FirstInput;
-        case 'h': isHollowRandom = true; goto FirstInput;
-        case 'e': isDenseRandom = true; goto FirstInput;
+        case 'c': isClassic = true; isCustomPolyomino = false; isTrueRandom = false; isHollowRandom = false; isDenseRandom = false; goto FirstInput;
+        case 'd': isClassic = false; isCustomPolyomino = true; isTrueRandom = false; isHollowRandom = false; isDenseRandom = false; GetCustomPolymino(); goto FirstInput;
+        case 't': isClassic = false; isCustomPolyomino = false; isTrueRandom = true; isHollowRandom = false; isDenseRandom = false; goto FirstInput;
+        case 'h':  isClassic = false; isCustomPolyomino = false; isTrueRandom = false; isHollowRandom = true; isDenseRandom = false; goto FirstInput;
+        case 'e':  isClassic = false; isCustomPolyomino = false; isTrueRandom = false; isHollowRandom = false; isDenseRandom = true; goto FirstInput;
 
         case 'q': break;
         default: goto FirstInput;
@@ -274,5 +273,5 @@ FirstInput:
 }
 
 void GameOver() {
-
+    while (1);
 }

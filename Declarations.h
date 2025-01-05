@@ -1,3 +1,6 @@
+#include "../Nyx-CNG/Nyx-ANSI.h"
+#include "../Nyx-CNG/Nyx-Mouse.h"
+
 const short Height = 24, Width = 16, PaddingY = 9, PaddingX = 26;
 short Speed = 10, LinesCleared = 0, Score = 0, Level = 0, NextPiece, curPiece, NumberOfCustomPolyominos = 0, RotationAlgorithm = 0;
 unsigned short GameArr[Height + 1] = { 0 }, CustomPolyominos[20 + 1] = { 0 };

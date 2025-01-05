@@ -1,10 +1,9 @@
 #include <unistd.h>
 #include <termios.h>
 #include "Declarations.h"
-#include "../Nyx-CNG/Nyx-ANSI.h"
-#include "../Nyx-CNG/Nyx-Mouse.h"
 #include "Logic.h"
 #include "UI.h"
+
 
 int main() {
     Putstr(CURSOR_INVISIBLE);

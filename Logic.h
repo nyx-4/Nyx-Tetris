@@ -167,14 +167,19 @@ void StartGame() {
     else if (isCustomPolyomino) blockNext = CustomPolyominos[Rand(7, Garbage) % NumberOfCustomPolyominos];
     else if (isTrueRandom) blockNext = Rand(16, Garbage);
     else if (isDenseRandom) blockNext = Rand(16, Garbage) | Rand(16, Garbage);
-    else if (isHollowRandom) while (blockNext == 0) blockNext = Rand(16, Garbage) & Rand(16, Garbage);
+    else if (isHollowRandom) {
+        blockNext = 0;
+        while (blockNext == 0) blockNext = Rand(16, Garbage) & Rand(16, Garbage);
+    }
 
     if (isClassic) block = ClassicTetrominos[Rand(7, Garbage) % 7];
     else if (isCustomPolyomino) block = CustomPolyominos[Rand(7, Garbage) % NumberOfCustomPolyominos];
     else if (isTrueRandom) block = Rand(16, Garbage);
     else if (isDenseRandom) block = Rand(16, Garbage) | Rand(16, Garbage);
-    else if (isHollowRandom) while (block == 0) block = Rand(16, Garbage) & Rand(16, Garbage);
-
+    else if (isHollowRandom) {
+        blockNext = 0;
+        while (blockNext == 0) blockNext = Rand(16, Garbage) & Rand(16, Garbage);
+    }
     DrawUI();
     DrawNextBlock(blockNext);
     char ch = '0';
@@ -239,7 +244,10 @@ void StartGame() {
                 else if (isCustomPolyomino) blockNext = CustomPolyominos[Rand(7, Garbage) % NumberOfCustomPolyominos];
                 else if (isTrueRandom) blockNext = Rand(16, Garbage);
                 else if (isDenseRandom) blockNext = Rand(16, Garbage) | Rand(16, Garbage);
-                else if (isHollowRandom) while (blockNext == 0) blockNext = Rand(16, Garbage) & Rand(16, Garbage);
+                else if (isHollowRandom) {
+                    blockNext = 0;
+                    while (blockNext == 0) blockNext = Rand(16, Garbage) & Rand(16, Garbage);
+                }
 
                 if (isCollision(block, 0, 8)) {
                     GameOver();
