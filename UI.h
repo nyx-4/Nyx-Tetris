@@ -7,14 +7,15 @@ void gotoyx(int y, int x) {
     Putch('H');
 }
 
-void box(int start_row, int start_col, int height, int width, const char* Title) {
+void box(int start_row, int start_col, int height, int width,
+         const char *Title) {
     Putstr(START_LINE_MODE);
     gotoyx(start_row, start_col);
     Putch('l');
     for (int i = 1; i < width - 1; i++) Putch('q');
     Putch('k');
 
-    for (int i = 1; i < height - 1;i++) {
+    for (int i = 1; i < height - 1; i++) {
         gotoyx(i + start_row, start_col);
         Putch('x');
         gotoyx(i + start_row, start_col + width - 1);
@@ -32,17 +33,23 @@ void box(int start_row, int start_col, int height, int width, const char* Title)
 
 void DrawLogo(int y, int x, int state = 0) {
     gotoyx(y + 0, x);
-    Putstr("\033[31m████████╗\033[32m███████╗\033[33m████████╗\033[34m██████╗ \033[35m██╗\033[36m███████╗");
+    Putstr("\033[31m████████╗\033[32m███████╗\033[33m████████╗\033[34m██████╗ "
+           "\033[35m██╗\033[36m███████╗");
     gotoyx(y + 1, x);
-    Putstr("\033[31m╚══██╔══╝\033[32m██╔════╝\033[33m╚══██╔══╝\033[34m██╔══██╗\033[35m██║\033[36m██╔════╝");
+    Putstr("\033[31m╚══██╔══╝\033[32m██╔════╝\033[33m╚══██╔══╝\033["
+           "34m██╔══██╗\033[35m██║\033[36m██╔════╝");
     gotoyx(y + 2, x);
-    Putstr("\033[31m   ██║   \033[32m█████╗  \033[33m   ██║   \033[34m██████╔╝\033[35m██║\033[36m███████╗");
+    Putstr("\033[31m   ██║   \033[32m█████╗  \033[33m   ██║   "
+           "\033[34m██████╔╝\033[35m██║\033[36m███████╗");
     gotoyx(y + 3, x);
-    Putstr("\033[31m   ██║   \033[32m██╔══╝  \033[33m   ██║   \033[34m██╔══██╗\033[35m██║\033[36m╚════██║");
+    Putstr("\033[31m   ██║   \033[32m██╔══╝  \033[33m   ██║   "
+           "\033[34m██╔══██╗\033[35m██║\033[36m╚════██║");
     gotoyx(y + 4, x);
-    Putstr("\033[31m   ██║   \033[32m███████╗\033[33m   ██║   \033[34m██║  ██║\033[35m██║\033[36m███████║");
+    Putstr("\033[31m   ██║   \033[32m███████╗\033[33m   ██║   \033[34m██║  "
+           "██║\033[35m██║\033[36m███████║");
     gotoyx(y + 5, x);
-    Putstr("\033[31m   ╚═╝   \033[32m╚══════╝\033[33m   ╚═╝   \033[34m╚═╝  ╚═╝\033[35m╚═╝\033[36m╚══════╝\033[39m");
+    Putstr("\033[31m   ╚═╝   \033[32m╚══════╝\033[33m   ╚═╝   \033[34m╚═╝  "
+           "╚═╝\033[35m╚═╝\033[36m╚══════╝\033[39m");
 }
 
 void DrawLogin() {
@@ -67,7 +74,6 @@ void DrawLogin() {
     box(22, 30, 5, 22, "");
     gotoyx(24, 37);
     Putstr("About \033[4mU\033[24ms");
-
 }
 
 void DrawUI() {
@@ -116,22 +122,16 @@ void DrawUI() {
     Putstr(FG_DEFAULT);
 }
 
-void ShowTweaks() {
+void ShowTweaks() { }
 
-}
+void ShowHelp() { }
 
-void ShowHelp() {
+void ShowAboutUs() { }
 
-}
-
-void ShowAboutUs() {
-
-}
-
-void LineCompleteChangeColor(short LineNumber, const char* Color) {
+void LineCompleteChangeColor(short LineNumber, const char *Color) {
     gotoyx(LineNumber + PaddingY + 1, PaddingX + 2);
     Putstr(Color);
-    for (int i = 0; i < 2 * Width;i++) Putch(' ');
+    for (int i = 0; i < 2 * Width; i++) Putch(' ');
     Putstr(BG_DEFAULT);
 }
 
@@ -166,11 +166,11 @@ void LineCompleteClear(short LineNumber) {
     DrawUI();
 }
 
-void DrawBlock(short block, int pos_y, int pos_x, const char* on_one, const char* on_zero) {
+void DrawBlock(short block, int pos_y, int pos_x, const char *on_one,
+               const char *on_zero) {
     gotoyx(pos_y + PaddingY + 1, 2 * pos_x + PaddingX + 2);
     for (int i = 15; i >= 0; i--) {
-        if ((block >> i) & 1)
-            Putstr(on_one);
+        if ((block >> i) & 1) Putstr(on_one);
         else
             Putstr(on_zero);
 
@@ -261,17 +261,46 @@ FirstInput:
         case 'r': RotationAlgorithm = 4; goto FirstInput;
         case 'v': RotationAlgorithm = 5; goto FirstInput;
 
-        case 'c': isClassic = true; isCustomPolyomino = false; isTrueRandom = false; isHollowRandom = false; isDenseRandom = false; goto FirstInput;
-        case 'd': isClassic = false; isCustomPolyomino = true; isTrueRandom = false; isHollowRandom = false; isDenseRandom = false; GetCustomPolymino(); goto FirstInput;
-        case 't': isClassic = false; isCustomPolyomino = false; isTrueRandom = true; isHollowRandom = false; isDenseRandom = false; goto FirstInput;
-        case 'h':  isClassic = false; isCustomPolyomino = false; isTrueRandom = false; isHollowRandom = true; isDenseRandom = false; goto FirstInput;
-        case 'e':  isClassic = false; isCustomPolyomino = false; isTrueRandom = false; isHollowRandom = false; isDenseRandom = true; goto FirstInput;
+        case 'c':
+            isClassic         = true;
+            isCustomPolyomino = false;
+            isTrueRandom      = false;
+            isHollowRandom    = false;
+            isDenseRandom     = false;
+            goto FirstInput;
+        case 'd':
+            isClassic         = false;
+            isCustomPolyomino = true;
+            isTrueRandom      = false;
+            isHollowRandom    = false;
+            isDenseRandom     = false;
+            GetCustomPolymino();
+            goto FirstInput;
+        case 't':
+            isClassic         = false;
+            isCustomPolyomino = false;
+            isTrueRandom      = true;
+            isHollowRandom    = false;
+            isDenseRandom     = false;
+            goto FirstInput;
+        case 'h':
+            isClassic         = false;
+            isCustomPolyomino = false;
+            isTrueRandom      = false;
+            isHollowRandom    = true;
+            isDenseRandom     = false;
+            goto FirstInput;
+        case 'e':
+            isClassic         = false;
+            isCustomPolyomino = false;
+            isTrueRandom      = false;
+            isHollowRandom    = false;
+            isDenseRandom     = true;
+            goto FirstInput;
 
         case 'q': break;
         default: goto FirstInput;
     }
 }
 
-void GameOver() {
-    while (1);
-}
+void GameOver() { while (1); }
